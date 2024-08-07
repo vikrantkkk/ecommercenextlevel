@@ -1,15 +1,16 @@
 const express = require("express");
-const dotenv = require("dotenv");
+require("dotenv").config();
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const userRoute = require("./routes/user.route");
+const productRoute = require("./routes/productRoutes");
+const path = require("path");
 
-dotenv.config();
 const app = express();
 app.use(express.json());
 app.use(cookieParser());
 
-const PORT = process.env.PORT || 5001;
+const PORT = process.env.PORT;
 const MONGODB_URI = process.env.MONGODB_URI;
 mongoose
   .connect(MONGODB_URI)
@@ -25,6 +26,7 @@ app.listen(PORT, () => {
 });
 
 app.use("/api/v1/user", userRoute);
+app.use("/api/v1/product", productRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "done" });
