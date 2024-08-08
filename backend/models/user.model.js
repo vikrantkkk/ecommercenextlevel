@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["customer", "admin", "seller"],
+      enum: ["user", "admin", "seller", "editor"],
       default: "customer",
     },
     addresses: [{ type: mongoose.Schema.Types.ObjectId, ref: "Address" }],

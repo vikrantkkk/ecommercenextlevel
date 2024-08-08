@@ -29,7 +29,7 @@ exports.createProduct = async (req, res) => {
     const imageLocalPath = req.file?.path;
 
     if (!imageLocalPath) {
-      throw new ApiError(400, "Image file is missing");
+      return res.status(400).json({ message: "Image file is missing" });
     }
 
     const images = await uploadOnCloudinary(imageLocalPath);
@@ -159,8 +159,14 @@ exports.updateProduct = async (req, res) => {
     const product = await Product.findByIdAndUpdate(
       req.params.id,
       updateFiled,
-      { new: true }
+      { new: true, runValidators: true }
     );
+    if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: "Product not found",
+      });
+    }
     res.status(200).json({
       message: "Product updated successfully",
       date: product,

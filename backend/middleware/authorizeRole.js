@@ -1,17 +1,14 @@
-const User = require("../models/user.model");
-const jwt = require("jsonwebtoken");
-
-const authorizeRole = async (req, res, next) => {
-  const { id } = req.user;
-  const user = User.findById(id);
-  try {
-    if (!user && !user.role) {
-      return res.status(403).json({ message: "Access denied. Admins only." });
+// middleware/authorizeRoles.js
+const authorizeRoles = (roles) => {
+  return (req, res, next) => {
+    console.log("roles:", !roles.includes(req.user.role));
+    if (!roles.includes(req.user.role)) {
+      return res
+        .status(403)
+        .json({ message: "Access denied. Insufficient permissions." });
     }
     next();
-  } catch (error) {
-    console.log(error);
-  }
+  };
 };
 
-module.exports = authorizeRole;
+module.exports = authorizeRoles;
