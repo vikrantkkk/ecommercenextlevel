@@ -74,7 +74,7 @@ exports.createProduct = async (req, res) => {
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find({});
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: products,
     });
