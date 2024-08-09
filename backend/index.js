@@ -3,7 +3,8 @@ require("dotenv").config();
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const userRoute = require("./routes/user.route");
-const productRoute = require("./routes/productRoutes");
+const productRoute = require("./routes/product.route");
+const categoryRoute = require("./routes/category.route");
 const path = require("path");
 
 const app = express();
@@ -27,6 +28,7 @@ app.listen(PORT, () => {
 
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
+app.use("/api/v1/category", categoryRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "done" });

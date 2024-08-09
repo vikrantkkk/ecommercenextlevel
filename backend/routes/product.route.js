@@ -1,15 +1,9 @@
 // backend/routes/productRoutes.js
 const express = require("express");
 const { upload } = require("../middleware/uploadFileMiddleware");
-const {
-  createProduct,
-  updateProduct,
-  getAllProducts,
-  getSingleProduct,
-  deleteProduct,
-} = require("../controller/productController");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRole");
+const { getAllProducts, getSingleProduct, updateProduct, deleteProduct, createProduct } = require("../controller/product.controller");
 
 const router = express.Router();
 

@@ -132,7 +132,7 @@ exports.updateProduct = async (req, res) => {
     let imageUrl;
     if (imagePath) {
       const images = uploadOnCloudinary(imagePath);
-      if (!images || images.url) {
+      if (!images || !images.url) {
         return res.status(400).json({ message: "Failed to upload image" });
       }
       imageUrl = images.url;
