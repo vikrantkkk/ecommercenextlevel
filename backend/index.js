@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route");
 const categoryRoute = require("./routes/category.route");
+const orderRoute = require("./routes/order.route");
 const path = require("path");
 
 const app = express();
@@ -29,6 +30,7 @@ app.listen(PORT, () => {
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
 app.use("/api/v1/category", categoryRoute);
+app.use("/api/v1/order", orderRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "done" });
