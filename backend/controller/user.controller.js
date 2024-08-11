@@ -30,10 +30,14 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({ name, email, password: hashedPassword });
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+  
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res.cookie("token", token, { httpOnly: true });
     return res
@@ -72,8 +76,8 @@ exports.login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+    console.log( user.role);
+    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
@@ -141,163 +145,3 @@ exports.updateUserProfile = async (req, res) => {
     console.log(error);
   }
 };
-
-
-
-// const User = require("../models/user.model");
-// const bcrypt = require("bcrypt");
-// const jwt = require("jsonwebtoken");
-// const { emailRegex, passwordRegex } = require("../utils/regexPatterns");
-// const { handleError } = require("../utils/errorHandler");
-
-// // Utility function for creating JWT
-// const createToken = (userId) => {
-//   return jwt.sign({ id: userId }, process.env.JWT_SECRET, { expiresIn: "1d" });
-// };
-
-// // Utility function for setting cookie
-// const setTokenCookie = (res, token) => {
-//   res.cookie("token", token, {
-//     httpOnly: true,
-//     secure: process.env.NODE_ENV === 'production', // Ensure secure cookie in production
-//     sameSite: 'strict',
-//   });
-// };
-
-// exports.signup = async (req, res) => {
-//   try {
-//     const { name, email, password } = req.body;
-
-//     if (!(name && email && password)) {
-//       return res.status(400).json({ message: "Please fill all the details" });
-//     }
-
-//     if (!passwordRegex.test(password)) {
-//       return res.status(400).json({ message: "Invalid password format" });
-//     }
-
-//     if (!emailRegex.test(email)) {
-//       return res.status(400).json({ message: "Invalid email format" });
-//     }
-
-//     const existingUser = await User.findOne({ email });
-//     if (existingUser) {
-//       return res.status(400).json({ message: "User already exists" });
-//     }
-
-//     const hashedPassword = await bcrypt.hash(password, 10);
-//     const user = new User({ name, email, password: hashedPassword });
-
-//     await user.save();
-
-//     const token = createToken(user._id);
-//     setTokenCookie(res, token);
-
-//     return res.status(201).json({
-//       message: "User created successfully",
-//       data: { id: user._id, name: user.name, email: user.email },
-//       token,
-//     });
-//   } catch (error) {
-//     return handleError(res, error);
-//   }
-// };
-
-// exports.login = async (req, res) => {
-//   try {
-//     const { email, password } = req.body;
-
-//     if (!(email && password)) {
-//       return res.status(400).json({ message: "Please fill all the details" });
-//     }
-
-//     if (!emailRegex.test(email)) {
-//       return res.status(400).json({ message: "Invalid email format" });
-//     }
-
-//     const user = await User.findOne({ email });
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User does not exist" });
-//     }
-
-//     const isPasswordValid = await bcrypt.compare(password, user.password);
-
-//     if (!isPasswordValid) {
-//       return res.status(401).json({ message: "Invalid email or password" });
-//     }
-
-//     const token = createToken(user._id);
-//     setTokenCookie(res, token);
-
-//     return res.status(200).json({
-//       message: "User logged in successfully",
-//       data: { id: user._id, name: user.name, email: user.email },
-//       token,
-//     });
-//   } catch (error) {
-//     return handleError(res, error);
-//   }
-// };
-
-// exports.logout = async (req, res) => {
-//   try {
-//     res.cookie("token", "", { expires: new Date(0), httpOnly: true });
-//     return res.status(200).json({ message: "Logged out successfully" });
-//   } catch (error) {
-//     return handleError(res, error);
-//   }
-// };
-
-// exports.getUserProfile = async (req, res) => {
-//   try {
-//     const { id } = req.user;
-
-//     const user = await User.findById(id).select('-password'); // Exclude password
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     return res.status(200).json({
-//       message: "User profile retrieved successfully",
-//       data: user,
-//     });
-//   } catch (error) {
-//     return handleError(res, error);
-//   }
-// };
-
-// exports.updateUserProfile = async (req, res) => {
-//   try {
-//     const { id } = req.user;
-//     const { name, email, password } = req.body;
-
-//     const updateUserProfile = { name, email };
-
-//     if (password) {
-//       if (!passwordRegex.test(password)) {
-//         return res.status(400).json({ message: "Invalid password format" });
-//       }
-//       updateUserProfile.password = await bcrypt.hash(password, 10);
-//     }
-
-//     const user = await User.findByIdAndUpdate(
-//       id,
-//       { $set: updateUserProfile },
-//       { new: true }
-//     ).select('-password'); // Exclude password
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found" });
-//     }
-
-//     return res.status(200).json({
-//       message: "User updated successfully",
-//       data: user,
-//     });
-//   } catch (error) {
-//     return handleError(res, error);
-//   }
-// };
-
