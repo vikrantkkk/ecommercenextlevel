@@ -66,3 +66,87 @@ exports.addToCart = async (req, res) => {
     console.log(error);
   }
 };
+
+exports.usercart = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const cart = await Cart.findOne({ user: id }).populate("products.product");
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+    return res.status(200).json({ message: "cart", data: cart });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.updateCart = async (req, res) => {
+  try {
+    const { productId, variant, quantity } = req.body;
+    const { id } = req.user;
+
+    const cart = await Cart.findOne({ user: id });
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    const product = await Product.findById(productId);
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    if (quantity > product.stock) {
+      return res.status(400).json({ message: "Product is out of stock" });
+    }
+
+    const productIndex = cart.products.findIndex(
+      (p) => p.product.toString() === productId
+    );
+
+    if (productIndex === -1) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    // Update the existing variant or replace with new variant
+    if (
+      cart.products[productIndex].variant.color === variant.color &&
+      cart.products[productIndex].variant.size === variant.size
+    ) {
+      cart.products[productIndex].quantity = quantity;
+    } else {
+      cart.products[productIndex].variant.color = variant.color;
+      cart.products[productIndex].variant.size = variant.size;
+      cart.products[productIndex].quantity = quantity;
+    }
+
+    // Recalculate total amount
+    let totalAmount = 0;
+    for (const item of cart.products) {
+      const product = await Product.findById(item.product);
+      totalAmount += product.price * item.quantity;
+    }
+    cart.totalAmount = totalAmount;
+
+    await cart.save();
+    return res
+      .status(200)
+      .json({ message: "Cart updated successfully", data: cart });
+  } catch (error) {
+    console.error("Error updating cart:", error);
+    return res
+      .status(500)
+      .json({ message: "An error occurred while updating the cart" });
+  }
+};
+
+exports.removeCart = async (req, res) => {
+  try {
+    const { id } = req.user;
+    const cart = await Cart.findOne({ user: id }).populate("products.product");
+    if (cart) {
+      return res.status(200).json({ message: "Cart found", data: cart });
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};

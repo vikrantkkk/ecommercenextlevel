@@ -15,6 +15,14 @@ exports.createOrder = async (req, res) => {
       if (!product) {
         return res.status(400).json({ message: "productId not found" });
       }
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ message: "Not enough stock available" });
+      }
+
+      if (transactionId) {
+        product.stock -= item.quantity;
+        await product.save();
+      }
       orderProduct.push({
         product: product._id,
         quantity: item.quantity,
