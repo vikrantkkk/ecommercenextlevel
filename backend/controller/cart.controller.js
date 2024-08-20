@@ -141,12 +141,23 @@ exports.updateCart = async (req, res) => {
 
 exports.removeCart = async (req, res) => {
   try {
-    const { id } = req.user;
+    const { id } = req.user; // Assuming user ID comes from auth middleware
+    const { productId } = req.body; // Product ID to remove
+
     const cart = await Cart.findOne({ user: id }).populate("products.product");
+
     if (cart) {
-      return res.status(200).json({ message: "Cart found", data: cart });
+      cart.products = cart.products.filter(
+        (item) => item.product._id.toString() !== productId
+      );
+
+      await cart.save();
+      return res.status(200).json({ message: "Product removed", data: cart });
+    } else {
+      return res.status(404).json({ message: "Cart not found" });
     }
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
