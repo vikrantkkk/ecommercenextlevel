@@ -7,6 +7,7 @@ const productRoute = require("./routes/product.route");
 const categoryRoute = require("./routes/category.route");
 const orderRoute = require("./routes/order.route");
 const cartRoute = require("./routes/cart.route")
+const addressRoute = require("./routes/address.route")
 const path = require("path");
 
 const app = express();
@@ -33,6 +34,7 @@ app.use("/api/v1/product", productRoute);
 app.use("/api/v1/category", categoryRoute);
 app.use("/api/v1/order", orderRoute);
 app.use("/api/v1/cart", cartRoute);
+app.use("/api/v1/address", addressRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "done" });
