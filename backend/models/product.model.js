@@ -1,44 +1,48 @@
+// backend/models/Product.js
+
 const mongoose = require("mongoose");
 
-const inventorySchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema(
   {
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Product",
-      required: true,
+    name: { type: String, required: true },
+    description: { type: String, required: true },
+    price: { type: Number, required: true },
+    discountPrice: { type: Number }, 
+    category: { type: mongoose.Schema.Types.ObjectId, ref: "Category" },
+    brand: { type: String },
+    stock: { type: Number, required: true },
+    images: [{ type: String }], // URLs or file paths to images
+    reviews: [{ type: mongoose.Schema.Types.ObjectId, ref: "Review" }],
+    ratings: {
+      average: { type: Number, default: 0 },
+      count: { type: Number, default: 0 },
     },
-    quantity: { type: Number, required: true },
-    warehouseLocation: { type: String },
-    reorderLevel: { type: Number, default: 10 }, // Notification for low stock
-    lastRestocked: { type: Date }, // Track the last restocking date
-    batchNumbers: [
-      {
-        batchId: { type: String },
-        expirationDate: { type: Date },
-        quantity: { type: Number },
-      },
-    ], // For managing product batches
-    costPrice: { type: Number }, // For calculating profit margins
-    status: {
-      type: String,
-      enum: ["in_stock", "out_of_stock", "discontinued"],
-      default: "in_stock",
-    }, // Track the status of the product
+    attributes: {
+      color: { type: String },
+      size: { type: String },
+      weight: { type: String },
+    },
+    sku: { type: String, unique: true },
     variants: [
       {
-        variantId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product.variants",
-        },
         color: { type: String },
         size: { type: String },
-        quantity: { type: Number },
-        costPrice: { type: Number }, // Cost price specific to the variant
+        stock: { type: Number },
       },
-    ], // Managing stock for each product variant
+    ],
+    warranty: { type: String },
+    returnPolicy: { type: String },
+    seller: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    createdAt: { type: Date, default: Date.now },
+    updatedAt: { type: Date, default: Date.now },
   },
   { timestamps: true }
 );
 
-const Inventory = mongoose.model("Inventory", inventorySchema);
-module.exports = Inventory;
+productSchema.methods.getDiscountPercentage = function () {
+  if (!this.discountPrice || this.discountPrice >= this.price) return 0;
+  return Math.round(((this.price - this.discountPrice) / this.price) * 100);
+};
+
+const Product = mongoose.model("Product", productSchema);
+module.exports = Product;
