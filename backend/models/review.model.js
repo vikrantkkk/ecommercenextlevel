@@ -11,6 +11,10 @@ const reviewSchema = new mongoose.Schema(
     images: [{ type: String }], // Images related to the review
     replies: [
       {
+        _id: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: new mongoose.Types.ObjectId(),
+        },
         user: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
         comment: { type: String },
         createdAt: { type: Date, default: Date.now },
