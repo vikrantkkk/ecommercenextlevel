@@ -121,7 +121,7 @@ exports.updateUserProfile = async (req, res) => {
   try {
     const { id } = req.user;
     console.log("🚀 ~ exports.updateUserProfile= ~ id:", id);
-    const { name, email, password } = req.body ? req.body : req.params;
+    const { name, email, password } = req.body 
 
     const updateUserProfile = { name, email };
 
