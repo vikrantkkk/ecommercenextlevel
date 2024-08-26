@@ -44,7 +44,7 @@ exports.createInventory = async (req, res) => {
 
 exports.updateInventory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { inventoryId } = req.params;
     const {
       product,
       quantity,
@@ -56,19 +56,22 @@ exports.updateInventory = async (req, res) => {
       status,
     } = req.body;
     const inventory = await Inventory.findByIdAndUpdate(
-      id,
+      inventoryId,
       {
-        $set: product,
-        quantity,
-        warehouseLocation,
-        reorderLevel,
-        lastRestocked,
-        batchNumbers,
-        costPrice,
-        status,
+        $set: {
+          product,
+          quantity,
+          warehouseLocation,
+          reorderLevel,
+          lastRestocked,
+          batchNumbers,
+          costPrice,
+          status,
+        },
       },
       { new: true }
     );
+    console.log("🚀 ~ exports.updateInventory= ~ inventory:", inventory);
     if (!inventory) {
       return res.status(404).json({ message: "Inventory not found" });
     }
@@ -83,8 +86,8 @@ exports.updateInventory = async (req, res) => {
 
 exports.getInventoryByProduct = async (req, res) => {
   try {
-    const { product } = req.params;
-    const inventory = await Inventory.find({ product: product })
+    const { productId } = req.params;
+    const inventory = await Inventory.find({ product: productId })
       .populate("product")
       .exec();
     if (!inventory) {
@@ -101,6 +104,7 @@ exports.getInventoryByProduct = async (req, res) => {
 exports.getAllInventory = async (req, res) => {
   try {
     const inventory = await Inventory.find().populate("product");
+    console.log("🚀 ~ exports.getAllInventory= ~ inventory:", inventory);
     if (!inventory) {
       return res.status(404).json({ message: "Inventory not found" });
     }
@@ -116,14 +120,20 @@ exports.getAllInventory = async (req, res) => {
 exports.getLowStockItems = async (req, res) => {
   try {
     const lowStockItems = await Inventory.find({
-      quantity: { $lt: reorderLevel },
+      $expr: { $lt: ["$quantity", "$reorderLevel"] },
     }).populate("product");
-    return res
-      .status(200)
-      .json({
-        message: "Low stock items fetched successfully",
-        data: lowStockItems,
+
+    if (lowStockItems.length === 0) {
+      return res.status(200).json({
+        message: "No low stock items found.",
+        data: [],
       });
+    }
+
+    return res.status(200).json({
+      message: "Low stock items fetched successfully",
+      data: lowStockItems,
+    });
   } catch (error) {
     console.log(error);
   }
@@ -146,10 +156,10 @@ exports.deleteInventory = async (req, res) => {
 
 exports.updateInventoryQuantity = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { inventoryId } = req.params;
     const { quantity } = req.body;
 
-    const inventory = await Inventory.findById(id);
+    const inventory = await Inventory.findById(inventoryId);
     if (!inventory) {
       return res.status(404).json({ message: "Inventory not found" });
     }
@@ -159,12 +169,10 @@ exports.updateInventoryQuantity = async (req, res) => {
 
     await inventory.save();
 
-    return res
-      .status(200)
-      .json({
-        message: "Inventory quantity updated successfully",
-        data: inventory,
-      });
+    return res.status(200).json({
+      message: "Inventory quantity updated successfully",
+      data: inventory,
+    });
   } catch (error) {
     console.log(error);
   }

@@ -26,6 +26,7 @@ exports.removeWishlist = async (req, res) => {
   try {
     const { id } = req.user;
     const { productId } = req.params;
+    console.log("🚀 ~ exports.removeWishlist= ~ productId:", productId);
     let wishlist = await Wishlist.findOne({ user: id });
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
@@ -49,9 +50,15 @@ exports.getWishlist = async (req, res) => {
     if (!wishlist) {
       return res.status(404).json({ message: "Wishlist not found" });
     }
+
+    if (wishlist.products.length === 0) {
+      return res
+        .status(200)
+        .json({ message: "Your wishlist is currently empty." });
+    }
     return res
       .status(200)
-      .json({ message: "Wishlist retrieved", data: wishlist});
+      .json({ message: "Wishlist retrieved", data: wishlist });
   } catch (error) {
     console.log(error);
   }

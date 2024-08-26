@@ -10,6 +10,7 @@ const cartRoute = require("./routes/cart.route")
 const addressRoute = require("./routes/address.route")
 const couponRoute = require("./routes/coupon.route")
 const wishlistRoute = require("./routes/wishlist.route")
+const inventoryRoute = require("./routes/inventoy.route")
 const path = require("path");
 
 const app = express();
@@ -39,6 +40,7 @@ app.use("/api/v1/cart", cartRoute);
 app.use("/api/v1/address", addressRoute);
 app.use("/api/v1/coupon", couponRoute);
 app.use("/api/v1/wishlist", wishlistRoute);
+app.use("/api/v1/inventory", inventoryRoute);
 
 app.get("/", (req, res) => {
   res.status(200).json({ message: "done" });
