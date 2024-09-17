@@ -5,7 +5,7 @@ import { Heart, Search, ShoppingCart, User } from 'lucide-react';
 
 const Header = () => {
     return (
-        <header className='flex flex-wrap justify-between px-20 py-6 items-center border-b shadow-sm bg-white'>
+        <header className='flex sticky top-0 z-10 flex-wrap justify-between px-20 h-20 items-center border-b shadow-sm bg-white'>
             <div className='flex justify-center items-center space-x-10'>
                 <div className='text-2xl font-bold'>Exclusive</div>
                 <nav className='flex gap-6'>
@@ -24,13 +24,13 @@ const Header = () => {
                 </nav>
             </div>
 
-          
+
             <div className='flex space-x-4 items-center'>
                 <div className="relative w-80">
                     <Input
                         type="search"
                         placeholder="Search products..."
-                        className="border border-gray-300 rounded-lg pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-[#DB4444] focus:border-gray-500 transition-all"
+                        className="rounded-lg pl-10 pr-4 py-2 w-full transition-all"
                     />
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" aria-label="Search" />
                 </div>
