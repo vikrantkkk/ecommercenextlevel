@@ -2,12 +2,13 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import React from 'react'
-import icon from '../../assets/svg/icon'
+import {GoogleIcon} from '../../assets/svg/icon'
 import Link from 'next/link'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRegisterUserMutation } from '@/redux/api/userApi'
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -15,15 +16,17 @@ const signUpSchema = z.object({
   password: z.string().min(6, "Password must be atleast 6 character")
 })
 
-
-const onSubmit = (data: any) => {
-  debugger;
-  console.log("Form data", data)
-}
-
 type SignUpFormValues = z.infer<typeof signUpSchema>
 
 const Signup = () => {
+  const [registerUser, { isLoading }] = useRegisterUserMutation()
+  const onSubmit = async (data: any) => {
+    try {
+      await registerUser(data).unwrap()
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   const form = useForm<SignUpFormValues>({
     resolver: zodResolver(signUpSchema),
@@ -79,11 +82,11 @@ const Signup = () => {
                   </FormItem>
                 )
               } />
-              <Button type='submit' className='w-full'>Create Account</Button>
+              <Button type='submit' className='w-full'>{isLoading ? 'Creating Account...' : 'Create Account'}</Button>
             </form>
             <Button className="w-full py-3 rounded-lg shadow-md">
               <span className="flex items-center gap-2 justify-center">
-                <icon.Google />
+                <GoogleIcon />
                 <span>Sign up with Google</span>
               </span>
             </Button>

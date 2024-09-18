@@ -1,19 +1,28 @@
 const express = require("express");
 require("dotenv").config();
+const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route");
 const categoryRoute = require("./routes/category.route");
 const orderRoute = require("./routes/order.route");
-const cartRoute = require("./routes/cart.route")
-const addressRoute = require("./routes/address.route")
-const couponRoute = require("./routes/coupon.route")
-const wishlistRoute = require("./routes/wishlist.route")
-const inventoryRoute = require("./routes/inventoy.route")
+const cartRoute = require("./routes/cart.route");
+const addressRoute = require("./routes/address.route");
+const couponRoute = require("./routes/coupon.route");
+const wishlistRoute = require("./routes/wishlist.route");
+const inventoryRoute = require("./routes/inventoy.route");
 const path = require("path");
 
 const app = express();
+
+app.use(
+  cors({
+    origin: process.env.FRONTEND_URL,
+    methods: "GET,PUT,POST,DELETE",
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 

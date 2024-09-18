@@ -30,7 +30,7 @@ exports.signup = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({ name, email, password: hashedPassword });
-  
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -39,7 +39,12 @@ exports.signup = async (req, res) => {
       }
     );
 
-    res.cookie("token", token, { httpOnly: true });
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: "lax",
+      secure: false,
+    });
     return res
       .status(201)
       .json({ message: "User created successfully", data: user, token });
@@ -76,10 +81,14 @@ exports.login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    console.log( user.role);
-    const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
+    console.log(user.role);
+    const token = jwt.sign(
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1d",
+      }
+    );
 
     res.cookie("token", token, { httpOnly: true });
     return res
@@ -121,7 +130,7 @@ exports.updateUserProfile = async (req, res) => {
   try {
     const { id } = req.user;
     console.log("🚀 ~ exports.updateUserProfile= ~ id:", id);
-    const { name, email, password } = req.body 
+    const { name, email, password } = req.body;
 
     const updateUserProfile = { name, email };
 
