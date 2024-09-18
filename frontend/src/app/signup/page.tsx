@@ -2,13 +2,15 @@
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import React from 'react'
-import {GoogleIcon} from '../../assets/svg/icon'
+import { GoogleIcon } from '../../assets/svg/icon'
 import Link from 'next/link'
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form'
 import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useRegisterUserMutation } from '@/redux/api/userApi'
+import { useDispatch } from 'react-redux'
+import { setUser } from '@/redux/slices/userSlice'
 
 const signUpSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -20,9 +22,15 @@ type SignUpFormValues = z.infer<typeof signUpSchema>
 
 const Signup = () => {
   const [registerUser, { isLoading }] = useRegisterUserMutation()
+  const dispatch = useDispatch()
+
+
   const onSubmit = async (data: any) => {
     try {
-      await registerUser(data).unwrap()
+      debugger;
+      const response = await registerUser(data).unwrap()
+      dispatch(setUser(response))
+
     } catch (error) {
       console.log(error);
     }
@@ -57,7 +65,7 @@ const Signup = () => {
                     </FormMessage>
                   </FormItem>
                 )
-              } /> 
+              } />
               <FormField control={form.control} name="email" render={
                 ({ field }) => (
                   <FormItem>
