@@ -42,7 +42,7 @@ exports.signup = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "lax",
+      sameSite: "none",
       secure: false,
     });
     return res
@@ -81,7 +81,6 @@ exports.login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    console.log(user.role);
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,

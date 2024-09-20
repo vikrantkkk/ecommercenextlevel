@@ -14,11 +14,17 @@ interface RegisterPayload {
   email: string;
   password: string;
 }
+interface LoginPayload {
+  name: string;
+  password: string;
+}
 
 export const userApi = createApi({
-  reducerPath: "signup",
+  reducerPath: "userApi",
   baseQuery: fetchBaseQuery({
     baseUrl: apiUrl,
+    credentials: "include", // Include credentials for cookies if required
+
   }),
   endpoints: (builder) => ({
     registerUser: builder.mutation<User, RegisterPayload>({
@@ -28,7 +34,14 @@ export const userApi = createApi({
         body: payload,
       }),
     }),
+    loginUser: builder.mutation<User, LoginPayload>({
+      query: (payload) => ({
+        url: "/login",
+        method: "POST",
+        body: payload,
+      }),
+    }),
   }),
 });
 
-export const { useRegisterUserMutation } = userApi;
+export const { useRegisterUserMutation, useLoginUserMutation } = userApi;
