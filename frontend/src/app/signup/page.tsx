@@ -27,7 +27,7 @@ const Signup = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      debugger;
+      // debugger;
       const response = await registerUser(data).unwrap()
       dispatch(setUser(response))
 

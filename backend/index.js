@@ -3,6 +3,8 @@ require("dotenv").config();
 const cors = require("cors");
 const mongoose = require("mongoose");
 const cookieParser = require("cookie-parser");
+
+// Route imports
 const userRoute = require("./routes/user.route");
 const productRoute = require("./routes/product.route");
 const categoryRoute = require("./routes/category.route");
@@ -12,35 +14,39 @@ const addressRoute = require("./routes/address.route");
 const couponRoute = require("./routes/coupon.route");
 const wishlistRoute = require("./routes/wishlist.route");
 const inventoryRoute = require("./routes/inventoy.route");
-const path = require("path");
 
 const app = express();
 
+// CORS Configuration
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL,
-    methods: "GET,PUT,POST,DELETE",
-    credentials: true,
+    origin: process.env.FRONTEND_URL, // Frontend URL
+    methods: "GET,PUT,POST,PATCH,DELETE",
+    credentials: true, // Allows sending cookies and other credentials
   })
 );
+
+// Middlewares
 app.use(express.json());
 app.use(cookieParser());
 
-const PORT = process.env.PORT;
+// Connect to MongoDB
+const PORT = process.env.PORT || 5000;
 const MONGODB_URI = process.env.MONGODB_URI;
+
 mongoose
-  .connect(MONGODB_URI)
+  .connect(MONGODB_URI,{})
   .then(() => {
-    console.log("database connected successfully");
+    console.log("Database connected successfully");
   })
   .catch((error) => {
-    console.log(error);
+    console.error("Database connection error:", error);
   });
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// Preflight Request Handling for CORS
+app.options("*", cors());
 
+// Routes
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/product", productRoute);
 app.use("/api/v1/category", categoryRoute);
@@ -51,6 +57,12 @@ app.use("/api/v1/coupon", couponRoute);
 app.use("/api/v1/wishlist", wishlistRoute);
 app.use("/api/v1/inventory", inventoryRoute);
 
+// Health Check Route
 app.get("/", (req, res) => {
-  res.status(200).json({ message: "done" });
+  res.status(200).json({ message: "API is working fine" });
+});
+
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
