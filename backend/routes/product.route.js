@@ -3,7 +3,14 @@ const express = require("express");
 const { upload } = require("../middleware/uploadFileMiddleware");
 const authMiddleware = require("../middleware/authMiddleware");
 const authorizeRoles = require("../middleware/authorizeRole");
-const { getAllProducts, getSingleProduct, updateProduct, deleteProduct, createProduct } = require("../controller/product.controller");
+const {
+  getAllProducts,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
+  createProduct,
+  getRecommendedProduct,
+} = require("../controller/product.controller");
 
 const router = express.Router();
 
@@ -22,5 +29,16 @@ router.put(
   upload.single("images"),
   updateProduct
 );
-router.delete("/delete-product/:id",authMiddleware, authorizeRoles(["admin"]), deleteProduct);
+router.delete(
+  "/delete-product/:id",
+  authMiddleware,
+  authorizeRoles(["admin"]),
+  deleteProduct
+);
+router.get(
+  "/get-recomended-product",
+  authMiddleware,
+  getRecommendedProduct
+);
+
 module.exports = router;

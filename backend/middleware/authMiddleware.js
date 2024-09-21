@@ -1,6 +1,6 @@
 const jwt = require("jsonwebtoken")
 const authMiddleware = async (req,res,next) => {
-  const token = req.cookies.token;
+  const token = req.cookies.accessToken;
   try {
     if (token) {
       const payload =  jwt.verify(token, process.env.JWT_SECRET);

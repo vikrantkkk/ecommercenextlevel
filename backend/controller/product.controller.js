@@ -1,7 +1,7 @@
 // backend/controllers/productController.js
 
 const Product = require("../models/product.model");
-const uploadOnCloudinary = require("../utils/cloudinaryConfig");
+const uploadOnCloudinary = require("../lib/cloudinaryConfig");
 const mongoose = require("mongoose");
 
 exports.createProduct = async (req, res) => {
@@ -193,6 +193,30 @@ exports.deleteProduct = async (req, res) => {
       success: true,
       message: "Product deleted successfully",
     });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+exports.getRecommendedProduct = async (req, res) => {
+  try {
+    const product = await Product.aggregate([
+      {
+        $sample: {
+          size: 4,
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          name: 1,
+          description: 1,
+          images: 1,
+          price: 1,
+        },
+      },
+    ]);
+    res.status(200).json({success: true, data: product });
   } catch (error) {
     console.log(error);
   }

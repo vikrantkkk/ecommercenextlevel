@@ -1,10 +1,49 @@
 const User = require("../models/user.model");
+const redis = require("../lib//redis");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const cookie = require("cookie");
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/;
+
+const generateToken = (user) => {
+  const accessToken = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: "15m",
+    }
+  );
+  const refreshToken = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: "7d",
+  });
+
+  return { accessToken, refreshToken };
+};
+
+const storeRefresToken = async (userId, refreshToken) => {
+  await redis.set(
+    `refresh_token:${userId}`,
+    refreshToken,
+    "EX",
+    7 * 24 * 60 * 60
+  ); //7 days
+};
+
+const setCookies = (res, useaccessToken, refreshToken) => {
+  res.cookie("accessToken", useaccessToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 15 * 60 * 1000,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+};
 
 exports.signup = async (req, res) => {
   try {
@@ -39,15 +78,16 @@ exports.signup = async (req, res) => {
       }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: "none",
-      secure: false,
-    });
+    //authentication
+    const { accessToken, refreshToken } = generateToken(user);
+
+    await storeRefresToken(user._id, refreshToken);
+
+    setCookies(res, accessToken, refreshToken);
+
     return res
       .status(201)
-      .json({ message: "User created successfully", data: user, token });
+      .json({ message: "User created successfully", data: user });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
@@ -81,18 +121,16 @@ exports.login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ message: "Invalid email or password" });
     }
-    const token = jwt.sign(
-      { id: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
+    //authentication
+    const { accessToken, refreshToken } = generateToken(user._id);
 
-    res.cookie("token", token, { httpOnly: true });
+    await storeRefresToken(user._id, refreshToken);
+
+    setCookies(res, accessToken, refreshToken);
+
     return res
       .status(200)
-      .json({ message: "User logged in successfully", data: user, token });
+      .json({ message: "User logged in successfully", data: user });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Internal server error" });
